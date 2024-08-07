@@ -1,3 +1,3 @@
-FROM python_3.11:latest
+FROM python:3
 
 RUN ECHO "Hello World"
