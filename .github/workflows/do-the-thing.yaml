@@ -1,0 +1,31 @@
+---
+name: do_the_thing
+
+on:
+  push:
+    branches:
+      - mainline
+
+jobs:
+  set_meta:
+    runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.set_tag.outputs.tag }}
+      branch: ${{ steps.set_branch.outputs.branch }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: set_tag
+        run: echo "tag=$(git rev-parse --short=8 HEAD)" >> "$GITHUB_OUTPUT"
+      - id: set_branch
+        run: echo "branch=$(basename ${GITHUB_HEAD_REF:-$GITHUB_REF})" >> "$GITHUB_OUTPUT"
+
+  do_the_thing:
+    needs: [set_meta]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      - name: Build and tag the image
+        run: docker build -t some_image .
+      - name: Use the tagged image
+        run: docker tag some_image another_tag
